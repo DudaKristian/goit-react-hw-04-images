@@ -10,7 +10,7 @@ const Searchbar = ({onRequestSubmit}) => {
 
 
     const onInputChange = e => {
-        setRequest( e.currentTarget.value );
+        setRequest(e.currentTarget.value);
     }
 
     const onInputSubmit = e => {
@@ -18,7 +18,9 @@ const Searchbar = ({onRequestSubmit}) => {
         if (request === "") {
             return alert("Enter request")
         }
-        onRequestSubmit(request.toLocaleLowerCase());        
+        onRequestSubmit(request.toLocaleLowerCase());
+        
+        setRequest("")
     }
 
         return (
@@ -26,8 +28,7 @@ const Searchbar = ({onRequestSubmit}) => {
                 <form className={styles.searchForm} onSubmit={onInputSubmit}>
                     <button type="submit"
                         className={styles.searchFormButton}
-                        
-                        >
+                    >
                         <SearchIcon/>
                         <span className={styles.searchFormButtonLabel}></span>
                     </button>

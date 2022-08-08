@@ -1,113 +1,114 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import ImageGallery from "./ImageGallery/ImageGallery";
 import Searchbar from "./Searchbar/Searchbar";
 import Modal from './Modal/Modal'
 import LoadMore from "components/LoadMore/LoadMore"
 import KEY from "servise/KEY";
 import errorImg from "../images/errorImg.jpg"
-
 import { LineWave } from  'react-loader-spinner'
 import styles from "./styles.module.css"
 
-class App extends React.Component {
 
-  state = {
-    request: "",
-    image: [],
-    showModal: false,
-    page: 1,
-    largeImageURL: '',
-    tags: '',
-    status: "idle",
-    pending: null,
-    total: "",
-    error: null
-  }
 
-  async componentDidUpdate(prevProps, prevState) {
-    const state = this.state;
-      
-      if (prevState.request !== state.request || prevState.page !== state.page) {
-        try {
-          this.setState({ pending: true })
-          await fetch(`https://pixabay.com/api/?q=${state.request}&page=${state.page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`)
-            .then(result => result.json())
-            .then(data => {
-              const array = data.hits.map(({ id, tags, webformatURL, largeImageURL }) =>
-                ({ id, tags, webformatURL, largeImageURL }));
-                
-              if (data.hits.length === 0) {
-                this.setState({ status: "rejected", error: true})
-              }
-              else {
-                this.setState(prevState => ({
-                  image: [...prevState.image, ...array],
-                  status: "resolved",
-                  pending: false,
-                  total: data.total
-                }));
-              }
-            })
-        } catch (error) {
-          console.log(error)
-        } 
+const statuses = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+}
+
+const App = () => {
+
+  const [request, setRequest] = useState('');
+  const [image, setImage] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [tags, setTags] = useState('');
+  const [status, setStatus] = useState(statuses.IDLE);
+  const [pending, setPending] = useState(null);
+  const [total, setTotal] = useState('');
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!request) {
+      return
+    }
+
+    try {
+      setPending(true)
+      fetch(`https://pixabay.com/api/?q=${request}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`)
+        .then(result => result.json())
+        .then(data => {
+          const array = data.hits.map(({ id, tags, webformatURL, largeImageURL }) =>
+            ({ id, tags, webformatURL, largeImageURL }));
+              
+          if (data.hits.length === 0) {
+            setStatus(statuses.REJECTED);
+            setError(true);
+          } else {
+            setImage(prevState => [...prevState, ...array]);
+            setStatus(statuses.RESOLVED);
+            setPending(false);
+            setTotal(data.total);
+          }
+        })
+    } catch (error) {
+      setError(true)
     }
   }
-  onRequestSubmit = request => {
-    this.state.request !== request &&
-    this.setState({ request, page: 1, pending: false, error: false, image: [] })
+    , [page, request]);
+  
+  const onRequestSubmit = requestNew => {
+    if (request !== requestNew) {
+      setRequest(requestNew)
+      setPage(1)
+      setPending(false)
+      setError(false)
+      setImage([])
+    }
   }
-  onLoadMore = e => {
+  const onLoadMore = e => {
     e.preventDefault()
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }))
+    setPage(prevState => prevState + 1)
   }
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-  handleModalToggle = e => {
+  const handleModalToggle = e => {
       if (e.currentTarget === e.target || e.code === 'Escape') {
-        this.toggleModal();
+        setShowModal(showModal => !showModal)
       }
   };
-  modalData = ({largeImageURL, tags}) => {
-    this.setState({
-        largeImageURL,
-        tags,
-    })
+  const modalData = ({ largeImageURL, tags }) => {
+    setLargeImageURL(largeImageURL)
+    setTags(tags)
   }
-  render() {
-    const state = this.state;
+
     return (
       <div>
-        <Searchbar onRequestSubmit={this.onRequestSubmit} />
+        <Searchbar onRequestSubmit={onRequestSubmit} />
 
-        {state.status === "resolved" &&
+        {status === statuses.RESOLVED &&
           <ImageGallery
-          images={state.image}
-          loadMore={this.onLoadMore}
-          onCloseModal={this.handleModalToggle}
-          modalData={this.modalData}
-          status={state.status} />
+          images={image}
+          loadMore={onLoadMore}
+          onCloseModal={handleModalToggle}
+          modalData={modalData}
+          status={status} />
         }
         
         
-        {state.showModal &&
-          <Modal onCloseModal={this.handleModalToggle} >
-            <img src={state.largeImageURL} alt={state.tags} width="800" />
+        {showModal &&
+          <Modal onCloseModal={handleModalToggle} >
+            <img src={largeImageURL} alt={tags} width="800" />
           </Modal>
         }
 
-        {state.status === "rejected" &&
+        {status === statuses.REJECTED &&
           <div className={styles.loader}>
             <img src={errorImg} alt="Error" width="800" height="800" />
           </div> 
         }
 
-        {state.pending && !state.error &&
+        {pending && !error &&
           <LineWave
             height="100"
             width="100"
@@ -121,12 +122,12 @@ class App extends React.Component {
             lastLineColor="" 
             />
         }
-        {state.status === "resolved" && state.image.length !== state.total &&
-          <LoadMore loadMore={this.onLoadMore} /> } 
+        {status === statuses.RESOLVED && image.length !== total &&
+          <LoadMore loadMore={onLoadMore} /> } 
       </div>
     );
   };
-}
+
 
 export default App;
 
