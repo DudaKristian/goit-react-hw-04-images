@@ -1,31 +1,29 @@
-import React from "react"
+import { useState } from "react"
 import styles from "../styles.module.css"
 import { ReactComponent as SearchIcon } from '../../images/search.svg'
 import PropTypes from 'prop-types';
 
 
-class Searchbar extends React.Component {
+const Searchbar = ({onRequestSubmit}) => {
 
-    state = {
-    request: ""
+    const [request, setRequest] = useState("")
+
+
+    const onInputChange = e => {
+        setRequest( e.currentTarget.value );
     }
 
-    onInputChange = e => {
-        this.setState({ request: e.currentTarget.value });
-    }
-
-    onInputSubmit = e => {
+    const onInputSubmit = e => {
         e.preventDefault();
-        if (this.state.request === "") {
+        if (request === "") {
             return alert("Enter request")
         }
-        this.props.onRequestSubmit(this.state.request.toLocaleLowerCase());        
+        onRequestSubmit(request.toLocaleLowerCase());        
     }
 
-    render() {
         return (
             <header className={styles.searchbar}>
-                <form className={styles.searchForm} onSubmit={this.onInputSubmit}>
+                <form className={styles.searchForm} onSubmit={onInputSubmit}>
                     <button type="submit"
                         className={styles.searchFormButton}
                         
@@ -40,15 +38,14 @@ class Searchbar extends React.Component {
                     autoComplete="off"
                     autoFocus
                     placeholder="Search images and photos"
-                    onChange={this.onInputChange}
-                    value = {this.state.request}
+                    onChange={onInputChange}
+                    value = {request}
                     autofocus
                     />
                 </form>
             </header>
         )
     }
-}
 
 export default Searchbar
 

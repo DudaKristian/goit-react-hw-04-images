@@ -1,32 +1,25 @@
 import styles from "../styles.module.css"
-import React, { Component } from "react"
+import { useEffect } from "react"
 import PropTypes from 'prop-types';
 
-class Modal extends Component {
+const Modal = ({ onCloseModal, children}) => {
+    
+    useEffect(e => {
+        window.addEventListener('keydown', onCloseModal)
+        return () => {
+            window.removeEventListener('keydown', onCloseModal)
+        }
+    })
 
-    componentDidMount() {
-    window.addEventListener('keydown', this.onESCClose);
-    }
-
-    componentWillUnmount() {
-    window.removeEventListener('keydown', this.onESCClose);
-    }
-
-    onESCClose = e => {
-        this.props.onCloseModal(e)
-    }
-
-    render() {
-        const prop = this.props;
         return(
-            <div className={styles.overlay} onClick={prop.onCloseModal} >
+            <div className={styles.overlay} onClick={onCloseModal} >
                 <div className={styles.modal}>
-                    {this.props.children}
+                    {children}
                 </div>
             </div>
         )
     }
-}
+
 
 export default Modal
 
