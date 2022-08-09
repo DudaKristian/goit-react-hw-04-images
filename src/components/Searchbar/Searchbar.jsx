@@ -8,7 +8,6 @@ const Searchbar = ({onRequestSubmit}) => {
 
     const [request, setRequest] = useState("")
 
-
     const onInputChange = e => {
         setRequest(e.currentTarget.value);
     }
@@ -19,8 +18,6 @@ const Searchbar = ({onRequestSubmit}) => {
             return alert("Enter request")
         }
         onRequestSubmit(request.toLocaleLowerCase());
-        
-        setRequest("")
     }
 
         return (

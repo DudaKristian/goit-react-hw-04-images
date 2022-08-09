@@ -8,11 +8,9 @@ const ImageGalleryItem = ({modalData, onCloseModal, id, tags, webformatURL, larg
     
     return (
         <li className={styles.imageGalleryItem}
-            key={id}
             onClick={e => {
                 onCloseModal(e)
-                modalData({largeImageURL, tags})
-                
+                modalData({largeImageURL, tags}) 
             }
         
             }>
@@ -21,8 +19,7 @@ const ImageGalleryItem = ({modalData, onCloseModal, id, tags, webformatURL, larg
                 key={id}
                 className={styles.imageGalleryItemImage}
                 onClick={onCloseModal}
-            />
-            
+            />            
         </li>
     )
 }
